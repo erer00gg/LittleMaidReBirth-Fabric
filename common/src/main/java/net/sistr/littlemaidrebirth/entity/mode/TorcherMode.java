@@ -59,10 +59,8 @@ public class TorcherMode<T extends PathAwareEntity & FakePlayerSupplier & Tameab
         } else {
             base = mob.getBlockPos();
         }
-        long start = System.nanoTime();
         placePos = findSpawnablePoint(base)
                 .orElse(null);
-        System.out.println((System.nanoTime() - start) / 1000F / 1000F);
         return placePos != null;
     }
 
