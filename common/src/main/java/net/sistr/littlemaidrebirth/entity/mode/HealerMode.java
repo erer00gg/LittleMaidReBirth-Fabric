@@ -9,26 +9,21 @@ import net.minecraft.nbt.CompoundTag;
 import net.sistr.littlemaidmodelloader.entity.compound.SoundPlayable;
 import net.sistr.littlemaidmodelloader.resource.util.LMSounds;
 import net.sistr.littlemaidrebirth.api.mode.Mode;
-import net.sistr.littlemaidrebirth.api.mode.ModeManager;
-import net.sistr.littlemaidrebirth.entity.InventorySupplier;
-import net.sistr.littlemaidrebirth.entity.Tameable;
+import net.sistr.littlemaidrebirth.api.mode.ModeType;
+import net.sistr.littlemaidrebirth.entity.LittleMaidEntity;
 
 import java.util.OptionalInt;
 
-public class HealerMode<T extends PathAwareEntity & Tameable & InventorySupplier> implements Mode {
-    protected final T mob;
+public class HealerMode extends Mode {
+    protected final LittleMaidEntity mob;
     protected final int inventoryStart;
     protected final int inventoryEnd;
 
-    public HealerMode(T mob, int inventoryStart, int inventoryEnd) {
+    public HealerMode(ModeType<? extends Mode> modeType, String name, LittleMaidEntity mob, int inventoryStart, int inventoryEnd) {
+        super(modeType, name);
         this.mob = mob;
         this.inventoryStart = inventoryStart;
         this.inventoryEnd = inventoryEnd;
-    }
-
-    @Override
-    public void startModeTask() {
-
     }
 
     @Override
@@ -60,11 +55,6 @@ public class HealerMode<T extends PathAwareEntity & Tameable & InventorySupplier
     }
 
     @Override
-    public void startExecuting() {
-
-    }
-
-    @Override
     public void tick() {
         getFoodsIndex().ifPresent(index -> {
             Inventory inventory = mob.getInventory();
@@ -77,37 +67,6 @@ public class HealerMode<T extends PathAwareEntity & Tameable & InventorySupplier
                             ((SoundPlayable) owner).play(LMSounds.HEALING);
                     });
         });
-    }
-
-    @Override
-    public void resetTask() {
-
-    }
-
-    @Override
-    public void endModeTask() {
-
-    }
-
-    @Override
-    public void writeModeData(CompoundTag tag) {
-
-    }
-
-    @Override
-    public void readModeData(CompoundTag tag) {
-
-    }
-
-    @Override
-    public String getName() {
-        return "Healer";
-    }
-
-    static {
-        ModeManager.ModeItems items = new ModeManager.ModeItems();
-        items.add(stack -> stack.getItem().isFood());
-        ModeManager.INSTANCE.register(HealerMode.class, items);
     }
 
 }

@@ -29,15 +29,16 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.stream.Stream;
 
-public class CookingMode<T extends PathAwareEntity & InventorySupplier> implements Mode {
-    private final T mob;
+public class CookingMode extends Mode {
+    private final LittleMaidEntity mob;
     private final int inventoryStart;
     private final int inventoryEnd;
     private BlockPos furnacePos;
     private int timeToRecalcPath;
     private int findCool;
 
-    public CookingMode(T mob, int inventoryStart, int inventoryEnd) {
+    public CookingMode(ModeType<? extends CookingMode> modeType, String name, LittleMaidEntity mob, int inventoryStart, int inventoryEnd) {
+        super(modeType, name);
         this.mob = mob;
         this.inventoryStart = inventoryStart;
         this.inventoryEnd = inventoryEnd;
@@ -142,7 +143,7 @@ public class CookingMode<T extends PathAwareEntity & InventorySupplier> implemen
     }
 
     public boolean canSeeThrough(BlockPos pos) {
-        return !mob.world.getBlockState(pos).isSolidBlock(mob.world, pos);
+        return true;//!mob.world.getBlockState(pos).isSolidBlock(mob.world, pos);
     }
 
     @Override
@@ -331,14 +332,4 @@ public class CookingMode<T extends PathAwareEntity & InventorySupplier> implemen
             furnacePos = NbtHelper.toBlockPos(tag.getCompound("FurnacePos"));
     }
 
-    @Override
-    public String getName() {
-        return "Cooking";
-    }
-
-    static {
-        ModeManager.ModeItems items = new ModeManager.ModeItems();
-        items.add(Items.BOWL);
-        ModeManager.INSTANCE.register(CookingMode.class, items);
-    }
 }

@@ -123,7 +123,7 @@ public class ArcherMode<T extends PathAwareEntity & AimingPoseable & FakePlayerS
         double xD = targetPos.x - vec3d.x;
         double yD = targetPos.y - vec3d.y;
         double zD = targetPos.z - vec3d.z;
-        double hDist = MathHelper.sqrt(xD * xD + zD * zD);
+        double hDist = MathHelper.sqrt((float) (xD * xD + zD * zD));
         float pitch = (float) (-(MathHelper.atan2(yD, hDist) * (180D / Math.PI)));
         pitch += ((this.mob.getRandom().nextFloat() * 2 - 1) * (this.mob.getRandom().nextFloat() * 2 - 1)) * inaccuracy;
         pitch = MathHelper.wrapDegrees(pitch);
@@ -162,7 +162,7 @@ public class ArcherMode<T extends PathAwareEntity & AimingPoseable & FakePlayerS
         int interval = item instanceof IRangedWeapon ? ((IRangedWeapon) item).getInterval_LMRB(itemStack, this.mob) : 25;
         if (interval <= useCount) {
             //簡易誤射チェック、射線にターゲット以外が居る場合は撃たない
-            float distance = MathHelper.sqrt(distanceSq);
+            float distance = MathHelper.sqrt((float) distanceSq);
             EntityHitResult result = ProjectileUtil.getEntityCollision(mob.world, mob,
                     this.mob.getCameraPosVec(1F), target.getCameraPosVec(1F),
                     this.mob.getBoundingBox().expand(distance), entity ->
@@ -192,29 +192,4 @@ public class ArcherMode<T extends PathAwareEntity & AimingPoseable & FakePlayerS
         fakePlayer.clearActiveItem();
     }
 
-    @Override
-    public void endModeTask() {
-
-    }
-
-    @Override
-    public void writeModeData(CompoundTag tag) {
-
-    }
-
-    @Override
-    public void readModeData(CompoundTag tag) {
-
-    }
-
-    @Override
-    public String getName() {
-        return "Archer";
-    }
-
-    static {
-        ModeManager.ModeItems items = new ModeManager.ModeItems();
-        items.add(IRangedWeapon.class);
-        ModeManager.INSTANCE.register(ArcherMode.class, items);
-    }
 }
