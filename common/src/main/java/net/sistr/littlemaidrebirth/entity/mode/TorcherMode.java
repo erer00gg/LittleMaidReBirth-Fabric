@@ -2,9 +2,6 @@ package net.sistr.littlemaidrebirth.entity.mode;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ai.pathing.Path;
-import net.minecraft.entity.mob.PathAwareEntity;
-import net.minecraft.item.*;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemPlacementContext;

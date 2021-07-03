@@ -3,11 +3,9 @@ package net.sistr.littlemaidrebirth.entity.mode;
 import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.HopperBlockEntity;
-import net.minecraft.entity.mob.PathAwareEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.recipe.AbstractCookingRecipe;
@@ -19,8 +17,8 @@ import net.minecraft.util.math.Direction;
 import net.sistr.littlemaidmodelloader.entity.compound.SoundPlayable;
 import net.sistr.littlemaidmodelloader.resource.util.LMSounds;
 import net.sistr.littlemaidrebirth.api.mode.Mode;
-import net.sistr.littlemaidrebirth.api.mode.ModeManager;
-import net.sistr.littlemaidrebirth.entity.InventorySupplier;
+import net.sistr.littlemaidrebirth.api.mode.ModeType;
+import net.sistr.littlemaidrebirth.entity.LittleMaidEntity;
 import net.sistr.littlemaidrebirth.util.AbstractFurnaceAccessor;
 import net.sistr.littlemaidrebirth.util.BlockFinder;
 
@@ -42,11 +40,6 @@ public class CookingMode extends Mode {
         this.mob = mob;
         this.inventoryStart = inventoryStart;
         this.inventoryEnd = inventoryEnd;
-    }
-
-    @Override
-    public void startModeTask() {
-
     }
 
     @Override
@@ -254,9 +247,7 @@ public class CookingMode extends Mode {
             furnace.markDirty();
             this.mob.swingHand(Hand.MAIN_HAND);
             this.mob.playSound(SoundEvents.ENTITY_ITEM_PICKUP, 1.0F, this.mob.getRandom().nextFloat() * 0.1F + 1.0F);
-            if (mob instanceof SoundPlayable) {
-                ((SoundPlayable) mob).play(LMSounds.COOKING_START);
-            }
+            ((SoundPlayable) mob).play(LMSounds.COOKING_START);
             break;
         }
     }
@@ -277,9 +268,7 @@ public class CookingMode extends Mode {
             furnace.markDirty();
             this.mob.swingHand(Hand.MAIN_HAND);
             this.mob.playSound(SoundEvents.ENTITY_ITEM_PICKUP, 1.0F, this.mob.getRandom().nextFloat() * 0.1F + 1.0F);
-            if (mob instanceof SoundPlayable) {
-                ((SoundPlayable) mob).play(LMSounds.ADD_FUEL);
-            }
+            ((SoundPlayable) mob).play(LMSounds.ADD_FUEL);
             break;
         }
     }
@@ -296,9 +285,7 @@ public class CookingMode extends Mode {
             }
             this.mob.swingHand(Hand.MAIN_HAND);
             this.mob.playSound(SoundEvents.ENTITY_ITEM_PICKUP, 1.0F, this.mob.getRandom().nextFloat() * 0.1F + 1.0F);
-            if (mob instanceof SoundPlayable) {
-                ((SoundPlayable) mob).play(LMSounds.COOKING_OVER);
-            }
+            ((SoundPlayable) mob).play(LMSounds.COOKING_OVER);
             ItemStack copy = resultStack.copy();
             ItemStack leftover = HopperBlockEntity.transfer(furnace, inventory, furnace.removeStack(resultSlot, 1), null);
             if (leftover.isEmpty()) {
@@ -313,11 +300,6 @@ public class CookingMode extends Mode {
     @Override
     public void resetTask() {
         this.mob.setSneaking(false);
-    }
-
-    @Override
-    public void endModeTask() {
-
     }
 
     @Override
