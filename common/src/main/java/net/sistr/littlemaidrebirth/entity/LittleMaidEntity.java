@@ -73,6 +73,7 @@ import net.sistr.littlemaidrebirth.util.LivingAccessor;
 import net.sistr.littlemaidrebirth.util.ReachAttributeUtil;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 import static net.sistr.littlemaidrebirth.entity.Tameable.MovingState.ESCORT;
@@ -203,20 +204,13 @@ public class LittleMaidEntity extends TameableEntity implements CustomPacketEnti
     }
 
     public void setRandomTexture() {
-        List<TextureHolder> holders = LMTextureManager.INSTANCE.getAllTextures().stream()
-                .filter(h -> h.hasSkinTexture(false))
-                .collect(Collectors.toList());
-        Collections.shuffle(holders);
-        List<TextureColors> colors = Lists.newArrayList(TextureColors.values());
-        Collections.shuffle(colors);
-        holders.stream()
-                //モデルがあるやつ
-                .filter(h -> LMModelManager.INSTANCE.hasModel(h.getModelName()))
-                .findAny().ifPresent(h ->
-                colors.stream()
-                        //この色があるやつ
+        LMTextureManager.INSTANCE.getAllTextures().stream()
+                .filter(h -> h.hasSkinTexture(false))//野生テクスチャがある
+                .filter(h -> LMModelManager.INSTANCE.hasModel(h.getModelName()))//モデルがある
+                .min(Comparator.comparingInt(h -> ThreadLocalRandom.current().nextInt()))//ランダム抽出
+                .ifPresent(h -> Arrays.stream(TextureColors.values())
                         .filter(c -> h.getTexture(c, false, false).isPresent())
-                        .findAny()
+                        .min(Comparator.comparingInt(c -> ThreadLocalRandom.current().nextInt()))
                         .ifPresent(c -> {
                             this.setColor(c);
                             this.setTextureHolder(h, Layer.SKIN, Part.HEAD);
@@ -673,11 +667,31 @@ public class LittleMaidEntity extends TameableEntity implements CustomPacketEnti
     }
 
     @Override
+    public Iterable<ItemStack> getItemsHand() {
+        return () -> Lists.newArrayList(getMainHandStack(), getOffHandStack()).iterator();
+    }
+
+    @Override
+    public Iterable<ItemStack> getArmorItems() {
+        return Lists.newArrayList(
+                getEquippedStack(EquipmentSlot.FEET),
+                getEquippedStack(EquipmentSlot.LEGS),
+                getEquippedStack(EquipmentSlot.CHEST),
+                getEquippedStack(EquipmentSlot.HEAD));
+    }
+
+    @Override
     protected void dropInventory() {
         //鯖側でしか動かないが一応チェック
         Inventory inv = this.getInventory();
         if (inv instanceof PlayerInventory)
             ((LMInventorySupplier.LMInventory) inv).dropAll();
+    }
+
+    @Override
+    protected void damageArmor(DamageSource source, float amount) {
+        super.damageArmor(source, amount);
+        ((PlayerInventory) getInventory()).damageArmor(source, amount);
     }
 
     //テイム関連
