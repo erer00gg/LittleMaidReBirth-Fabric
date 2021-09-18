@@ -72,6 +72,7 @@ import net.sistr.littlemaidrebirth.util.LivingAccessor;
 import net.sistr.littlemaidrebirth.util.ReachAttributeUtil;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 import static net.sistr.littlemaidrebirth.entity.Tameable.MovingState.ESCORT;
@@ -158,7 +159,7 @@ public class LittleMaidEntity extends TameableEntity implements CustomPacketEnti
         this.goalSelector.add(1, new LongDoorInteractGoal(this, true));
         this.goalSelector.add(5, new HealMyselfGoal<>(this,
                 Sets.newHashSet(LMTags.Items.MAIDS_SALARY.values()), 2, 1));
-        this.goalSelector.add(10, new WaitGoal(this, this));
+        this.goalSelector.add(10, new WaitGoal<>(this));
         //todo 挙動が怪しい
         /*this.goalSelector.add(12, new WaitWhenOpenGUIGoal<>(this, this,
                 LittleMaidScreenHandler.class));*/
@@ -167,8 +168,8 @@ public class LittleMaidEntity extends TameableEntity implements CustomPacketEnti
         this.goalSelector.add(15, new ModeWrapperGoal(this));
         this.goalSelector.add(16, new FollowAtHeldItemGoal(this, this, true,
                 Sets.newHashSet(LMTags.Items.MAIDS_SALARY.values())));
-        this.goalSelector.add(17, new LMStareAtHeldItemGoal(this, this, false
-                , Sets.newHashSet(LMTags.Items.MAIDS_EMPLOYABLE.values())));
+        this.goalSelector.add(17, new LMStareAtHeldItemGoal(this, this, false,
+                Sets.newHashSet(LMTags.Items.MAIDS_EMPLOYABLE.values())));
         this.goalSelector.add(17, new LMStareAtHeldItemGoal(this, this, true,
                 Sets.newHashSet(LMTags.Items.MAIDS_SALARY.values())));
         this.goalSelector.add(18, new LMMoveToDropItemGoal(this, 8, 1D));
@@ -202,20 +203,13 @@ public class LittleMaidEntity extends TameableEntity implements CustomPacketEnti
     }
 
     public void setRandomTexture() {
-        List<TextureHolder> holders = LMTextureManager.INSTANCE.getAllTextures().stream()
-                .filter(h -> h.hasSkinTexture(false))
-                .collect(Collectors.toList());
-        Collections.shuffle(holders);
-        List<TextureColors> colors = Lists.newArrayList(TextureColors.values());
-        Collections.shuffle(colors);
-        holders.stream()
-                //モデルがあるやつ
-                .filter(h -> LMModelManager.INSTANCE.hasModel(h.getModelName()))
-                .findAny().ifPresent(h ->
-                colors.stream()
-                        //この色があるやつ
+        LMTextureManager.INSTANCE.getAllTextures().stream()
+                .filter(h -> h.hasSkinTexture(false))//野生テクスチャがある
+                .filter(h -> LMModelManager.INSTANCE.hasModel(h.getModelName()))//モデルがある
+                .min(Comparator.comparingInt(h -> ThreadLocalRandom.current().nextInt()))//ランダム抽出
+                .ifPresent(h -> Arrays.stream(TextureColors.values())
                         .filter(c -> h.getTexture(c, false, false).isPresent())
-                        .findAny()
+                        .min(Comparator.comparingInt(c -> ThreadLocalRandom.current().nextInt()))
                         .ifPresent(c -> {
                             this.setColor(c);
                             this.setTextureHolder(h, Layer.SKIN, Part.HEAD);
@@ -1037,7 +1031,7 @@ public class LittleMaidEntity extends TameableEntity implements CustomPacketEnti
 
         @Override
         public boolean canStart() {
-            return ((PlayerInventory) maid.getInventory()).getEmptySlot() != -1 && super.canStart();
+            return maid.getMovingState() != WAIT && ((PlayerInventory) maid.getInventory()).getEmptySlot() != -1 && super.canStart();
         }
     }
 
